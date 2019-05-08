@@ -1,6 +1,7 @@
 package ca.corefacility.bioinformatics.irida.config.web;
 
 import ca.corefacility.bioinformatics.irida.web.spring.view.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk7.Jdk7Module;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
@@ -107,5 +108,10 @@ public class IridaRestApiWebConfig extends WebMvcConfigurerAdapter {
 		source.setBasenames(resources);
 		source.setDefaultEncoding("UTF-8");
 		return source;
+	}
+
+	@Bean
+	public ObjectMapper objectMapper() {
+		return new ObjectMapper();
 	}
 }
