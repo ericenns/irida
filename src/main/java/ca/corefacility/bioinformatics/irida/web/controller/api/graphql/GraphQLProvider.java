@@ -23,6 +23,12 @@ import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 @Component
 public class GraphQLProvider {
 	private GraphQL graphQL;
+	private IridaWiring iridaWiring;
+
+	@Autowired
+	public GraphQLProvider(IridaWiring iridaWiring) {
+		this.iridaWiring = iridaWiring;
+	}
 
 	@PostConstruct
 	public void init() throws IOException {
@@ -34,9 +40,6 @@ public class GraphQLProvider {
 				.build();
 	}
 
-	@Autowired
-	GraphQLDataFetchers graphQLDataFetchers;
-
 	private GraphQLSchema buildSchema(String sdl) {
 		TypeDefinitionRegistry typeRegistry = new SchemaParser().parse(sdl);
 		RuntimeWiring runtimeWiring = buildWiring();
@@ -46,7 +49,11 @@ public class GraphQLProvider {
 
 	private RuntimeWiring buildWiring() {
 		return RuntimeWiring.newRuntimeWiring()
-				.type(newTypeWiring("Query").dataFetcher("project", graphQLDataFetchers.projectDataFetcher()))
+				.type(newTypeWiring("Query").dataFetcher("project", iridaWiring.projectDataFetcher))
+				.type(newTypeWiring("Project").dataFetcher("samples", iridaWiring.projectSamplesDataFetcher))
+				.type(newTypeWiring("Query").dataFetcher("projects", iridaWiring.projectsDataFetcher))
+				.type(newTypeWiring("Query").dataFetcher("sample", iridaWiring.sampleDataFetcher))
+				.type(newTypeWiring("Sample").dataFetcher("projects", iridaWiring.sampleProjectsDataFetcher))
 				.build();
 	}
 

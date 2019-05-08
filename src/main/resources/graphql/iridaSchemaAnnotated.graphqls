@@ -5,11 +5,46 @@ schema {
 type Query {
     project(
         id: ID!
-     ) : Project
+    ) : Project
+
+    projects : [Project]
+
+    sample(
+        id: ID!
+    ) : Sample
 }
 
 type Project {
     id: ID!
     name: String!
-    organism: String!
+    createdDate: String!
+    modifiedDate: String
+    projectDescription: String
+    assembleUploads: Boolean
+    samples: [Sample]
+    organism: String
+    genomeSize: Int
+    minimumCoverage: Int
+    maximumCoverage: Int
+    syncFrequency: String
+    label: String
+}
+
+type Sample {
+    id: ID!
+    createdDate: String!
+    modifiedDate: String
+    sampleName: String
+    description: String
+    organism: String
+    isolate: String
+    strain: String
+    collectedBy: String
+    collectionDate: String
+    geographicLocationName: String
+    isolationSource: String
+    latitude: String
+    longitude: String
+    projects: [Project]
+    label: String
 }
