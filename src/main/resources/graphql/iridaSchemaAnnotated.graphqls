@@ -28,7 +28,12 @@ type Mutation {
         projectDescription: String
         remoteUrl: String
         assembleUploads: Boolean!
-    ) : Project
+    ) : Project!
+
+    createSample(
+        sampleName: String!
+        organism: String
+    ) : Sample!
 }
 
 type Project {
@@ -83,5 +88,5 @@ type SequencingFile {
     file: String!
     createdDate: String!
     modifiedDate: String
-    uploadSha256: String;
+    uploadSha256: String
 }

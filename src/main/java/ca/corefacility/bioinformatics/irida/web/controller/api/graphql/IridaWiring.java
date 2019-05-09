@@ -22,6 +22,7 @@ import ca.corefacility.bioinformatics.irida.service.SequencingObjectService;
 import ca.corefacility.bioinformatics.irida.service.SequencingRunService;
 import ca.corefacility.bioinformatics.irida.service.sample.SampleService;
 
+import graphql.GraphQLException;
 import graphql.schema.DataFetcher;
 
 /**
@@ -87,7 +88,14 @@ public class IridaWiring {
 		newProject.setRemoteURL(remoteUrl);
 		newProject.setAssembleUploads(assembleUploads);
 
-		return projectService.create(newProject);
+		try {
+			newProject = projectService.create(newProject);
+		} catch (Exception e) {
+			logger.debug("Throwing GraphQLException in createProject");
+			throw new GraphQLException(e.getMessage());
+		}
+
+		return newProject;
 	};
 
 	DataFetcher projectSamplesDataFetcher = environment -> {
@@ -104,6 +112,23 @@ public class IridaWiring {
 		String id = environment.getArgument("id");
 
 		return sampleService.read(Long.valueOf(id));
+	};
+
+	DataFetcher createSampleMutationDataFetcher = environment -> {
+		Sample newSample = new Sample(environment.getArgument("sampleName"));
+
+		String organism = environment.getArgument("organism");
+
+		newSample.setOrganism(organism);
+
+		try {
+			newSample = sampleService.create(newSample);
+		} catch (Exception e) {
+			logger.debug("Throwing GraphQLException in createSample");
+			throw new GraphQLException(e.getMessage());
+		}
+
+		return newSample;
 	};
 
 	DataFetcher sampleProjectsDataFetcher = environment -> {
