@@ -12,6 +12,12 @@ type Query {
     sample(
         id: ID!
     ) : Sample
+
+    sequencingRun(
+        id: ID!
+    ) : SequencingRun
+
+    sequencingRuns : [SequencingRun]
 }
 
 type Project {
@@ -47,4 +53,23 @@ type Sample {
     longitude: String
     projects: [Project]
     label: String
+    sequencingFiles: [SequencingFile]
+}
+
+type SequencingRun {
+    id: ID!
+    description: String
+    createdDate: String!
+    modifiedDate: String!
+    uploadStatus: String!
+    layoutType: String!
+    sequencingFiles: [SequencingFile]
+}
+
+type SequencingFile {
+    id: ID!
+    file: String!
+    createdDate: String!
+    modifiedDate: String
+    uploadSha256: String;
 }
