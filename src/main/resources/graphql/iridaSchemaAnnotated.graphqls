@@ -1,5 +1,6 @@
 schema {
     query: Query
+    mutation: Mutation
 }
 
 type Query {
@@ -20,12 +21,23 @@ type Query {
     sequencingRuns : [SequencingRun]
 }
 
+type Mutation {
+    createProject(
+        name: String!
+        organism: String
+        projectDescription: String
+        remoteUrl: String
+        assembleUploads: Boolean!
+    ) : Project
+}
+
 type Project {
     id: ID!
     name: String!
     createdDate: String!
     modifiedDate: String
     projectDescription: String
+    remoteUrl: String
     assembleUploads: Boolean
     samples: [Sample]
     organism: String

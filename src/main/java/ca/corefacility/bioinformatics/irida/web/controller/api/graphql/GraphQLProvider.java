@@ -57,6 +57,7 @@ public class GraphQLProvider {
 				.type(newTypeWiring("Sample").dataFetcher("sequencingFiles", iridaWiring.sampleSequencingFilesDataFetcher))
 				.type(newTypeWiring("Query").dataFetcher("sequencingRuns", iridaWiring.sequencingRunsDataFetcher))
 				.type(newTypeWiring("SequencingRun").dataFetcher("sequencingFiles", iridaWiring.sequencingRunSequencingFilesDataFetcher))
+				.type(newTypeWiring("Mutation").dataFetcher("createProject", iridaWiring.createProjectMutationDataFetcher))
 				.build();
 	}
 

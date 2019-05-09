@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +30,7 @@ import graphql.schema.DataFetcher;
 @Component
 public class IridaWiring {
 
+	private static final Logger logger = LoggerFactory.getLogger(IridaWiring.class);
 	/**
 	 * Reference to {@link ProjectService}.
 	 */
@@ -69,6 +72,22 @@ public class IridaWiring {
 		String id = environment.getArgument("id");
 
 		return projectService.read(Long.valueOf(id));
+	};
+
+	DataFetcher createProjectMutationDataFetcher = environment -> {
+		Project newProject = new Project(environment.getArgument("name"));
+
+		String organism = environment.getArgument("organism");
+		String projectDescription = environment.getArgument("projectDescription");
+		String remoteUrl =  environment.getArgument("remoteUrl");
+		Boolean assembleUploads = environment.getArgument("assembleUploads");
+
+		newProject.setOrganism(organism);
+		newProject.setProjectDescription(projectDescription);
+		newProject.setRemoteURL(remoteUrl);
+		newProject.setAssembleUploads(assembleUploads);
+
+		return projectService.create(newProject);
 	};
 
 	DataFetcher projectSamplesDataFetcher = environment -> {
