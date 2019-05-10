@@ -10,7 +10,9 @@ type Query {
         id: ID!
     ) : Project
 
-    projects : [Project]
+    projects(
+        ids: [ID!]
+    ) : [Project]
 
     sample(
         id: ID!

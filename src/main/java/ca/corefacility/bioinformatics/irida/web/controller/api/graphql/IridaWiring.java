@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +106,16 @@ public class IridaWiring {
 	};
 
 	DataFetcher projectsDataFetcher = environment -> {
-		return projectService.findAll();
+		List<Long> projectIDS = ((ArrayList<String>) environment.getArgument("ids")).stream().map(
+				Long::parseLong).collect(Collectors.toList());
+		Iterable<Project> projects;
+
+		if (projectIDS != null) {
+			projects = projectService.readMultiple(projectIDS);
+		} else {
+			projects = projectService.findAll();
+		}
+		return projects;
 	};
 
 	DataFetcher sampleDataFetcher = environment -> {
