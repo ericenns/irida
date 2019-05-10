@@ -7,14 +7,17 @@ schema {
 
 type Query {
     project(
+        # The non null id of the project you are interested in
         id: ID!
     ) : Project
 
     projects(
+        # An optional list of ids for the projects you are interested in
         ids: [ID!]
     ) : [Project]
 
     sample(
+        # The non null id of the sample you are interested in
         id: ID!
     ) : Sample
 
@@ -40,6 +43,7 @@ type Mutation {
     ) : Sample!
 }
 
+# A project
 type Project {
     id: ID!
     name: String!
@@ -57,6 +61,7 @@ type Project {
     label: String
 }
 
+# A sample
 type Sample {
     id: ID!
     createdDate: String!
@@ -77,6 +82,7 @@ type Sample {
     sequencingFiles: [SequencingFile]
 }
 
+# A sequencing run
 type SequencingRun {
     id: ID!
     description: String
@@ -87,6 +93,7 @@ type SequencingRun {
     sequencingFiles: [SequencingFile]
 }
 
+# A sequencing file
 type SequencingFile {
     id: ID!
     file: String!
