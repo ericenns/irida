@@ -1,3 +1,5 @@
+directive @fetch(from : String!) on FIELD_DEFINITION
+
 schema {
     query: Query
     mutation: Mutation
@@ -25,13 +27,13 @@ type Mutation {
     createProject(
         name: String!
         organism: String
-        projectDescription: String
+        description: String
         remoteUrl: String
         assembleUploads: Boolean!
     ) : Project!
 
     createSample(
-        sampleName: String!
+        name: String!
         organism: String
     ) : Sample!
 }
@@ -41,7 +43,7 @@ type Project {
     name: String!
     createdDate: String!
     modifiedDate: String
-    projectDescription: String
+    description: String @fetch(from: "projectDescription")
     remoteUrl: String
     assembleUploads: Boolean
     samples: [Sample]
@@ -57,7 +59,7 @@ type Sample {
     id: ID!
     createdDate: String!
     modifiedDate: String
-    sampleName: String
+    name: String @fetch(from: "sampleName")
     description: String
     organism: String
     isolate: String

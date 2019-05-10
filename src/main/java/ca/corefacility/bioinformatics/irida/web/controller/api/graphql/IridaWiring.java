@@ -79,7 +79,7 @@ public class IridaWiring {
 		Project newProject = new Project(environment.getArgument("name"));
 
 		String organism = environment.getArgument("organism");
-		String projectDescription = environment.getArgument("projectDescription");
+		String projectDescription = environment.getArgument("description");
 		String remoteUrl =  environment.getArgument("remoteUrl");
 		Boolean assembleUploads = environment.getArgument("assembleUploads");
 
@@ -115,7 +115,7 @@ public class IridaWiring {
 	};
 
 	DataFetcher createSampleMutationDataFetcher = environment -> {
-		Sample newSample = new Sample(environment.getArgument("sampleName"));
+		Sample newSample = new Sample(environment.getArgument("name"));
 
 		String organism = environment.getArgument("organism");
 
