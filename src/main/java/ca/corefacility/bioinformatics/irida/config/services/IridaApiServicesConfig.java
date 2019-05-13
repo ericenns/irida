@@ -87,6 +87,7 @@ import ca.corefacility.bioinformatics.irida.service.impl.analysis.submission.Ana
 import ca.corefacility.bioinformatics.irida.service.user.UserService;
 import ca.corefacility.bioinformatics.irida.util.IridaPluginMessageSource;
 import net.matlux.NreplServerSpring;
+import tdb.cmdline.CmdSub;
 
 /**
  * Configuration for the IRIDA platform.
@@ -413,6 +414,11 @@ public class IridaApiServicesConfig {
 		taskExecutor.setQueueCapacity(16);
 		taskExecutor.setThreadPriority(Thread.MIN_PRIORITY);
 		return taskExecutor;
+	}
+
+	@Bean
+	public Executor graphqlTaskExecutor() {
+		return new DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2));
 	}
 
 	/*

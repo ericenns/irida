@@ -1,14 +1,15 @@
 package ca.corefacility.bioinformatics.irida.web.controller.api.graphql;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
 
+import org.dataloader.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import ca.corefacility.bioinformatics.irida.model.joins.Join;
@@ -33,6 +34,8 @@ import graphql.schema.DataFetcher;
 public class IridaWiring {
 
 	private static final Logger logger = LoggerFactory.getLogger(IridaWiring.class);
+
+	private final DataLoaderRegistry dataLoaderRegistry;
 	/**
 	 * Reference to {@link ProjectService}.
 	 */
@@ -49,6 +52,9 @@ public class IridaWiring {
 	 * Reference to {@link SequencingObjectService}.
 	 */
 	private SequencingObjectService sequencingObjectService;
+
+	@Autowired
+	private Executor graphqlTaskExecutor;
 
 	/**
 	 * Constructor for {@link IridaWiring}, requires a reference to a {@link ProjectService}
@@ -68,12 +74,43 @@ public class IridaWiring {
 		this.sampleService = sampleService;
 		this.sequencingRunService = sequencingRunService;
 		this.sequencingObjectService = sequencingObjectService;
+
+		this.dataLoaderRegistry = new DataLoaderRegistry();
+		dataLoaderRegistry.register("samples", sampleDataLoader);
+		dataLoaderRegistry.register("projects", projectDataLoader);
 	}
+
+	@Bean
+	public DataLoaderRegistry getDataLoaderRegistry() {
+		return dataLoaderRegistry;
+	}
+
+	BatchLoader<Long, Sample> sampleBatchLoader = new BatchLoader<Long, Sample>() {
+		@Override
+		public CompletionStage<List<Sample>> load(List<Long> keys) {
+			return CompletableFuture.supplyAsync(() -> {
+				return (List) sampleService.readMultiple(keys);
+			}, graphqlTaskExecutor);
+		}
+	};
+
+	BatchLoader<Long, Project> projectBatchLoader = new BatchLoader<Long, Project>() {
+		@Override
+		public CompletionStage<List<Project>> load(List<Long> keys) {
+			return CompletableFuture.supplyAsync(() -> {
+				return (List) projectService.readMultiple(keys);
+			}, graphqlTaskExecutor);
+		}
+	};
+
+	DataLoader<Long, Sample> sampleDataLoader = DataLoader.newDataLoader(sampleBatchLoader);
+	DataLoader<Long, Project> projectDataLoader = DataLoader.newDataLoader(projectBatchLoader);
 
 	DataFetcher projectDataFetcher = environment -> {
 		String id = environment.getArgument("id");
 
-		return projectService.read(Long.valueOf(id));
+		DataLoader<Long, Project> dataLoader = environment.getDataLoader("projects");
+		return dataLoader.load(Long.valueOf(id));
 	};
 
 	DataFetcher createProjectMutationDataFetcher = environment -> {
@@ -102,18 +139,22 @@ public class IridaWiring {
 	DataFetcher projectSamplesDataFetcher = environment -> {
 		Project project = environment.getSource();
 
-		return sampleService.getSamplesForProjectShallow(project);
+		List<Long> sampleIds = sampleService.getSampleIdsForProject(project);
+
+		DataLoader<Long, Sample> dataLoader = environment.getDataLoader("samples");
+		return dataLoader.loadMany(sampleIds);
 	};
 
 	DataFetcher projectsDataFetcher = environment -> {
-		List<Long> projectIDS = ((ArrayList<String>) environment.getArgument("ids")).stream().map(
-				Long::parseLong).collect(Collectors.toList());
+		List<Long> projectIDS = new ArrayList<>();
+		//List<Long> projectIDS = ((ArrayList<String>) environment.getArgument("ids")).stream().map(
+		//		Long::parseLong).collect(Collectors.toList());
 		Iterable<Project> projects;
 
-		if (projectIDS != null) {
-			projects = projectService.readMultiple(projectIDS);
-		} else {
+		if (projectIDS.isEmpty()) {
 			projects = projectService.findAll();
+		} else {
+			projects = projectService.readMultiple(projectIDS);
 		}
 		return projects;
 	};
@@ -121,7 +162,8 @@ public class IridaWiring {
 	DataFetcher sampleDataFetcher = environment -> {
 		String id = environment.getArgument("id");
 
-		return sampleService.read(Long.valueOf(id));
+		DataLoader<Long, Sample> dataLoader = environment.getDataLoader("samples");
+		return dataLoader.load(Long.valueOf(id));
 	};
 
 	DataFetcher createSampleMutationDataFetcher = environment -> {
@@ -144,15 +186,10 @@ public class IridaWiring {
 	DataFetcher sampleProjectsDataFetcher = environment -> {
 		Sample sample = environment.getSource();
 
-		List<Join<Project, Sample>> projectsForSample = projectService.getProjectsForSample(sample);
+		List<Long> projectIds = projectService.getProjectIdsForSample(sample);
 
-		List<Project> projects = new ArrayList<>();
-
-		for (Join<Project, Sample> join : projectsForSample) {
-			projects.add(join.getSubject());
-		}
-
-		return projects;
+		DataLoader<Long, Project> dataLoader = environment.getDataLoader("projects");
+		return dataLoader.loadMany(projectIds);
 	};
 
 	DataFetcher sampleSequencingFilesDataFetcher = environment -> {

@@ -250,6 +250,14 @@ public class SampleServiceImpl extends CRUDServiceImpl<Long, Sample> implements 
 		return samplesForProjectShallow;
 	}
 
+	@Transactional(readOnly = true)
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasPermission(#project, 'canReadProject')")
+	@Override
+	public List<Long> getSampleIdsForProject(Project project) {
+		List<Long> sampleIds = sampleRepository.getSampleIdsForProject(project);
+		return sampleIds;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */

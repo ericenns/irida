@@ -29,6 +29,9 @@ public interface ProjectSampleJoinRepository extends PagingAndSortingRepository<
 	@Query("select j from ProjectSampleJoin j where j.sample = ?1")
 	public List<Join<Project, Sample>> getProjectForSample(Sample sample);
 
+	@Query("select j.project.id from ProjectSampleJoin j where j.sample = ?1")
+	public List<Long> getProjectIdsForSample(Sample sample);
+
 	/**
 	 * Get a specific {@link ProjectSampleJoin} for a {@link Project} and
 	 * {@link Sample}

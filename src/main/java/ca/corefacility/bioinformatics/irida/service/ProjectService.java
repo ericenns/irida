@@ -282,6 +282,8 @@ public interface ProjectService extends CRUDService<Long, Project> {
 	 */
 	public List<Join<Project, Sample>> getProjectsForSample(Sample sample);
 
+	public List<Long> getProjectIdsForSample(Sample sample);
+
 	/**
 	 * Add a {@link ReferenceFile} to a {@link Project}.
 	 *

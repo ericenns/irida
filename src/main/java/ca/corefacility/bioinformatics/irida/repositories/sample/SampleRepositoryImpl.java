@@ -63,4 +63,18 @@ public class SampleRepositoryImpl implements SampleRepositoryCustom {
 
 		return results;
 	}
+
+	public List<Long> getSampleIdsForProject(Project project) {
+		NamedParameterJdbcTemplate tmpl = new NamedParameterJdbcTemplate(dataSource);
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+
+		//query to read sample ids for a project
+		String queryString = "select s.id FROM sample s INNER JOIN project_sample p ON p.sample_id=s.id WHERE p.project_id=:project";
+
+		parameters.addValue("project", project.getId());
+
+		List<Long> results = tmpl.queryForList(queryString,parameters,Long.class);
+
+		return results;
+	}
 }

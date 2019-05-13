@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.ExecutionInput;
 import graphql.GraphQL;
 
+import org.dataloader.DataLoaderRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ public class GraphQLController {
 
 	@Autowired
 	ObjectMapper objectMapper;
+
+	@Autowired
+	DataLoaderRegistry dataLoaderRegistry;
 
 	@RequestMapping(value = "/api/graphql", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	@CrossOrigin
@@ -72,6 +76,7 @@ public class GraphQLController {
 				.query(query)
 				.variables(variables)
 				.operationName(operationName)
+				.dataLoaderRegistry(dataLoaderRegistry)
 				.build();
 
 		return graphql.execute(executionInput)

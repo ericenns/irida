@@ -584,6 +584,13 @@ public class ProjectServiceImpl extends CRUDServiceImpl<Long, Project> implement
 		return psjRepository.getProjectForSample(sample);
 	}
 
+	@Override
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasPermission(#sample, 'canReadSample')")
+	//@PostFilter("hasPermission(filterObject.subject, 'canReadProject')")
+	public List<Long> getProjectIdsForSample(Sample sample) {
+		return psjRepository.getProjectIdsForSample(sample);
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
